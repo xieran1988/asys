@@ -27,7 +27,6 @@ void cam_callback()
 	t_last = now();
 
 	mon("no: %d fps: %.2lf\n", frame_no, 1000 / t_frame);
-	ui_mon();
 
 	t_process = now();
 	process();

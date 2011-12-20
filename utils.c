@@ -1,22 +1,10 @@
 #include <algo.h>
 
-FILE *_mon_fp;
-
 double now()
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	return (tv.tv_sec + tv.tv_usec/1e6)*1000;
-}
-
-FILE *fopen2(char *path, const char *mode)
-{
-	FILE *fp = fopen(path, mode);
-	if (!fp) {
-		log("fopen %s failed: %s\n", path, strerror(errno));
-		panic();
-	}
-	return fp;
 }
 
 int selected_read(int fd)

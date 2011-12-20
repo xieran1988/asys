@@ -477,8 +477,6 @@ void comm_init()
 	MyPTZ();
 	Init();
 
-	
-
 	if (pthread_create(&th, NULL, thread_routine, NULL)) {
 		log("comm thread create failed\n");
 		panic();
