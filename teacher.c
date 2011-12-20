@@ -27,6 +27,8 @@ double M_angle=8;
 double SA_p=4;
 double SA_z=0.2;
 
+int maskx1, maskx2, masky1, masky2;
+
 /*
 static double PAN_RANGE=75;
 //static double TILT_RANGE=25;
@@ -37,7 +39,6 @@ static double R_tilt = 0;
 static double last_lost_tm = -1;
 */
 static int bInited = 0;
-imgsel_t mask;
 img_t BACK,	//背景 
 	PREV, 	//上一帧
 	UBAK,	//背景更新参考值
@@ -59,19 +60,19 @@ typedef struct{ int left;
 }box;
 box Box[1000];
 
-typedef struct{ int px;
+typedef struct _NODE{ int px;
              int py;
-                struct NODE *link;
+                struct _NODE *link;
 
 }NODE;
 NODE *p,*q,*t,*queue=NULL,*tail=NULL, *Connected[1000];
 
 int label()
 {
-    int nHeight=mask.y2-mask.y1;//二值图高，宽
-    int nWidth=mask.x2-mask.x1;
-	int x1=mask.x1;
-	int y1=mask.y1;
+    int nHeight=masky2-masky1;//二值图高，宽
+    int nWidth=maskx2-maskx1;
+	int x1=maskx1;
+	int y1=masky1;
     enum{BLACK=255,WHITE=0};
     
     //char (*LABEL)[2000]=new char[nHeight][2000];//二值图
@@ -161,12 +162,12 @@ int label()
 void updataBack()
 {
 	int x=0,y=0,m=0,n=0,count=0;
-	for (y = mask.y1; y < mask.y2; y+=UB_H)
-		for (x = mask.x1; x < mask.x2; x+=UB_W)
+	for (y = masky1; y < masky2; y+=UB_H)
+		for (x = maskx1; x < maskx2; x+=UB_W)
 		{
 			count=0;
-			for(n = y; n < y+UB_H && n < mask.y2; ++n)
-				for(m = x; m < x+UB_W && m < mask.x2; ++m)
+			for(n = y; n < y+UB_H && n < masky2; ++n)
+				for(m = x; m < x+UB_W && m < maskx2; ++m)
 				{
 					count+=!!COMP.data[n][m];
 				}
@@ -176,8 +177,8 @@ void updataBack()
 				++UBAK.data[y][x];
 				if(UBAK.data[y][x] > UB_T/T_FRM)
 				{
-					for(n = y; n < y+UB_H && n < mask.y2; ++n)
-						for(m = x; m < x+UB_W && m < mask.x2; ++m)
+					for(n = y; n < y+UB_H && n < masky2; ++n)
+						for(m = x; m < x+UB_W && m < maskx2; ++m)
 						{
 							//高斯混合....
 							BACK.data[n][m] = Y.data[n][m] * B_Alpha + BACK.data[n][m] * (1.0 - B_Alpha);
@@ -195,27 +196,27 @@ void updataBack()
 void cluster()
 {
 	int x=0,y=0,m=0,n=0,count=0,ch=CB_H/3,cw=CB_W/3;
-	for (y = mask.y1; y < mask.y2; y+=ch)//减小复杂度，从逐点计算改为折半计算
-		for (x = mask.x1; x < mask.x2; x+=cw)
+	for (y = masky1; y < masky2; y+=ch)//减小复杂度，从逐点计算改为折半计算
+		for (x = maskx1; x < maskx2; x+=cw)
 		{
 			count=0;
-			for(n = y; n < y+CB_H && n < mask.y2; ++n)
-				for(m = x; m < x+CB_W && m < mask.x2; ++m)
+			for(n = y; n < y+CB_H && n < masky2; ++n)
+				for(m = x; m < x+CB_W && m < maskx2; ++m)
 				{
 					count+=!!COMPB.data[n][m];
 				}
 			if(count < (m-x)*(n-y)*CB_th)
 			{
-				for(n = y; n < y+ch && n < mask.y2; ++n)
-					for(m = x; m < x+cw && m < mask.x2; ++m)
+				for(n = y; n < y+ch && n < masky2; ++n)
+					for(m = x; m < x+cw && m < maskx2; ++m)
 					{
 						CLUS.data[n][m]=0;
 					}
 			}
 			else
 			{
-				for(n = y; n < y+CB_H && n < mask.y2; ++n)
-					for(m = x; m < x+CB_W && m < mask.x2; ++m)
+				for(n = y; n < y+CB_H && n < masky2; ++n)
+					for(m = x; m < x+CB_W && m < maskx2; ++m)
 					{
 						CLUS.data[n][m]=255;
 					}
@@ -359,8 +360,8 @@ void process()
 	img_fill(&LABEL, 0); 
 
 	//计算准备
-	for (y = mask.y1; y < mask.y2; y++)
-		for (x = mask.x1; x < mask.x2; x++)
+	for (y = masky1; y < masky2; y++)
+		for (x = maskx1; x < maskx2; x++)
 		{
 			COMP.data[y][x] = abs(Y.data[y][x] - PREV.data[y][x]) > compare_th ? 255 : 0;
 			if(Y.data[y][x] < dark || PREV.data[y][x] < dark)
@@ -385,8 +386,8 @@ void process()
 	//连通域
 	int k=label();
 
-	img_plot_rect(&Y, mask.x1, mask.y1, 
-			mask.x2 - mask.x1, mask.y2 - mask.y1, 128);
+	img_plot_rect(&Y, maskx1, masky1, 
+			maskx2 - maskx1, masky2 - masky1, 128);
 
 	
 	//输出连通域信息
@@ -437,10 +438,10 @@ void decl()
 	decl_img("CLUS", &CLUS);
 	decl_img("LABEL", &LABEL);
 
-	decl_var_int("X1", &mask.x1, 0, IMG_W);
-	decl_var_int("Y1", &mask.y1, 0, IMG_H);
-	decl_var_int("X2", &mask.x2, 0, IMG_W);
-	decl_var_int("Y2", &mask.y2, 0, IMG_H);
+	decl_var_int("X1", &maskx1, 0, IMG_W);
+	decl_var_int("Y1", &masky1, 0, IMG_H);
+	decl_var_int("X2", &maskx2, 0, IMG_W);
+	decl_var_int("Y2", &masky2, 0, IMG_H);
 	decl_var_double("PAN_RANGE", &PAN_RANGE, 0, 120);
 	decl_var_double("CAM_RANGE", &CAM_RANGE, 30, 120);
 	decl_var_int("LB_th", &LB_th, 200, 10000);
@@ -481,11 +482,10 @@ void decl()
 
 int main(int argc, char *argv[]) 
 {
-	mask.stat = IMGSEL_OK;
-	mask.x1=IMG_W*0.1;
-	mask.y1=IMG_H*0.4;
-	mask.x2=IMG_W*0.9;
-	mask.y2=IMG_H*0.65;
+	maskx1=IMG_W*0.1;
+	masky1=IMG_H*0.4;
+	maskx2=IMG_W*0.9;
+	masky2=IMG_H*0.65;
 	decl();
 	
 	run(argc, argv);

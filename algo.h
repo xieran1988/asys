@@ -56,8 +56,10 @@ void img_plot_rect(img_t *p, int x, int y, int w, int h, int val);
 void img_draw_cross(img_t *p, int x, int y, int val);
 
 /*
- * Net
+ * Mcu
  */
+void track_send(char *ip,char *buf,int len);
+
 
 /*
  * UI
