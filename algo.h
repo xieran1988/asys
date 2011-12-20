@@ -21,8 +21,6 @@
 #include <fcntl.h>
 #include <linux/videodev2.h>
 
-#include <algocomm.h>
-
 /*
  * Basic
  */

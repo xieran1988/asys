@@ -1,40 +1,19 @@
 
-pwd ?= $(shell pwd)
-appname := $(shell basename $(pwd))
-bakfile := /root/$(appname)-$(shell date +%F-%R.tar.bz2 | sed 's,:,,')
-uibakfile := /root/trackui-$(shell date +%F-%R.tar.bz2 | sed 's,:,,')
+export cross=/home/ncast/buildroot/output/host/opt/ext-toolchain/bin/arm-none-linux-gnueabi-
+CC = $(cross)gcc
+CFLAGS := -I. -O2 -Wall #-Werror
+objs := algo.o cam.o comm.o net.o xml.o utils.o
 
-armcc := arm-none-linux-gnueabi-gcc
+#a: a.o 
 
-cflags := -I$(aroot)/include -I. -O2 -Wall #-Werror
-inc := $(wildcard $(aroot)/include/*.h) $(wildcard $(pwd)/*.h)
+teacher: $(objs) teacher.o
 
-srcs := $(wildcard $(pwd)/*.c $(aroot)/*.c)
-objs := $(srcs:.c=.o)
-armobjs := $(srcs:.c=_arm.o)
-armexe := $(pwd)/arm$(appname)
+student: $(objs) student.o
 
-all: $(armexe)
-
-runarm: $(armexe)
-	echo "$(armexe)" > $(aroot)/autorun
-	armsync $(armexe) $(aroot)/autorun
-	armkillall
-	armsh "$(armexe)"
-
-$(armexe): $(armobjs)
-	$(armcc) -lm -lpthread $^ -o $@
-
-%_arm.o: %.c $(inc)
-	$(armcc) -c $(cflags) $< -o $@
-	
-backup:
-	tar -jcf $(bakfile) .
-	du -sh $(bakfile)
-	tar -jcf $(uibakfile) /root/Track
-	du -sh $(uibakfile)
+sersrv: $(objs) sersrv.o
 
 clean:
-	-rm -rf $(pwd)/*.o $(armexe)
+	rm -rf *.o
 
 
+ 
