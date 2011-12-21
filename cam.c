@@ -30,13 +30,14 @@ static int shouldshrink;
 
 void cam_init()
 {
-	int i;
+	int i, rt = 1;
 	struct v4l2_requestbuffers reqbuf;
 	struct v4l2_buffer buf;
 	struct v4l2_capability capability;
 	struct v4l2_input input;
 	struct v4l2_format fmt;
 
+retry:
 	capfd = open("/dev/video0", O_RDWR);
 	if (capfd <= 0) {
 		log("open dev failed\n");
@@ -106,7 +107,10 @@ void cam_init()
 		 )	
 	{
 		log("err getfmt.size %d,%d\n",fmt.fmt.pix.width,fmt.fmt.pix.height);
-		panic();
+		log("retry %d ...\n", rt);
+		rt++;
+		close(capfd);
+		goto retry;
 	}
 
 	if (fmt.fmt.pix.width == IMG_W*2 && fmt.fmt.pix.height == IMG_H*2) {

@@ -18,7 +18,7 @@ test-teacher: teacher
 	sudo cp teacher ${fs}/root
 	sudo su ncast -c \
 		"cd ~; make open-and-telnet-3530 \
-		cmd='cd /root/; ./teacher; cat test.xml; \
+		cmd='cd /root/; ./teacher; \
 		echo; echo testeof' eof='^testeof'"
 
 teacher: $(objs) teacher.o

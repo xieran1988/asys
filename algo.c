@@ -56,8 +56,8 @@ void run(int argc, char *argv[])
 
 	log("Copyright 2011. Build: %s. pid %d\n", __DATE__, getpid());
 
-//	comm_init();
-	//cam_init();
+	//comm_init();
+	cam_init();
 	ui_init();
 
 	return ;
