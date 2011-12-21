@@ -473,7 +473,6 @@ void comm_init()
 		panic();
 	}
 
-	comm_decl();
 	MyPTZ();
 	Init();
 

@@ -1,7 +1,25 @@
 #include <algo.h>
 
+static enum {
+	RD, WR
+} mode;
+static xmlTextReaderPtr reader;
+static xmlTextWriterPtr writer;
+
+#define startnode(s) xmlTextWriterStartElement(writer, (xmlChar *)s);
+#define endnode() xmlTextWriterEndElement(writer);
+#define attr(s, ...) xmlTextWriterWriteFormatAttribute(writer, (xmlChar *)s, __VA_ARGS__)
+#define nodeis(s) !strcmp((char *)xmlTextReaderConstName(reader), s)
+#define nodeattr(s) (char *)xmlTextReaderGetAttribute(reader, s)
+#define attris(s, v) !strcmp(nodeattr(s), v)
+#define getattr(s, ...) sscanf(nodeattr(s), __VA_ARGS__)
+
 void decl_img(const char *name, img_t *img)
 {
+	if (mode == WR) {
+		startnode("img");
+		endnode();
+	}
 }
 
 void decl_btn(const char *name, void (*cb)(const char *))
@@ -10,10 +28,33 @@ void decl_btn(const char *name, void (*cb)(const char *))
 
 void decl_var_int(const char *name, int *p, int min, int max)
 {
+	if (mode == WR) {
+		startnode("int");
+		attr("name", "%s", name);
+		attr("max", "%d", max);
+		attr("min", "%d", min);
+		attr("val", "%d", *p);
+		endnode();
+	}
+	if (mode == RD && nodeis("int") && attris("name", name)) {
+		getattr("val", "%d", p);
+	}
 }
 
 void decl_var_double(const char *name, double *p, double min, double max)
 {
+	if (mode == WR) {
+		startnode("double");
+		attr("name", "%s", name);
+		attr("max", "%lf", max);
+		attr("min", "%lf", min);
+		attr("val", "%lf", *p);
+		endnode();
+	}
+	if (mode == RD && nodeis("double") && attris("name", name)) {
+		getattr("val", "%lf", p);
+		printf("double: %lf\n", *p);
+	}
 }
 
 static void track_run(const char *_) 
@@ -41,70 +82,42 @@ static void track_pause(const char *_)
    	bPause=1;
 }
 
-void ui_init()
+static void all_decl()
 {
+	decl();
+	comm_decl();
+	decl_var_int("T_FRM", &T_FRM, 50, 500);
 	decl_btn("RUN", track_run);
 	decl_btn("STOP", track_stop);
 	decl_btn("Continue", track_continue);
 	decl_btn("Pause", track_pause);
 }
 
-void testxml()
+static void readxml(const char *name)
 {
-	int rc;
-	xmlTextWriterPtr writer;
-	xmlDocPtr doc;
-	xmlChar *tmp;
-
-	/* 创建一个新的xml Writer，无压缩*/
-	writer = xmlNewTextWriterDoc(&doc, 0);
-	if (writer == NULL) {        return;    }
-
-	/* 文档声明部分 */
-	rc = xmlTextWriterStartDocument(writer, NULL, "ISO-8859-1", NULL);
-	if (rc < 0) {      return;    }
-
-	/* 创建第一个元素"EXAMPLE"作为文档的根元素. */
-	rc = xmlTextWriterStartElement(writer, (xmlChar*)"EXAMPLE");
-	if (rc < 0) {       return;    }
-
-	/* 为EXAMPLE增加一个注释作为子元素，因为xmlTextWriter函数都使用
-	 *      * UTF-8的编码，所以这里对中文注释做一个编码转换*/
-
-	/* 假设wchar_t cmt 指向 "这是一个EXAMPLE元素的注释" 的UTF-16串*/
-	tmp = "这是一个EXAMPLE";
-	rc = xmlTextWriterWriteComment(writer, tmp);
-	if (rc < 0) {       return;    }
-
-	/*增加一个新的子元素ORDER*/
-	rc = xmlTextWriterStartElement(writer, (xmlChar*)"ORDER");
-	if (rc < 0) {       return;    }
-	/*为ORDER增加一个子元素，*/
-	rc = xmlTextWriterWriteFormatElement(writer, (xmlChar*)"NO", "%d",20);
-
-	/*结束子元素ORDER，直接调用下面的函数即可*/
-	rc = xmlTextWriterEndElement(writer);
-
-	/*结束元素EXAMPLE*/
-	rc = xmlTextWriterEndElement(writer);
-
-	/*释放xmlWriter的相关资源*/  
-	xmlFreeTextWriter(writer);
-
-	/*写XML文档（doc）到文件*/
-	xmlSaveFileEnc("test.xml", doc, "UTF-8");
-	xmlFreeDoc(doc);
-
-
-
-
-void readxml() 
-{
-	xmlDoc *doc;
-	xmlNode *root;
-
-	doc = xmlReadFile("");
-
+	mode = RD;
+	reader = xmlReaderForFile(name, NULL, 0);
+	xmlTextReaderRead(reader); // skip root
+	while (xmlTextReaderRead(reader) == 1) {
+		all_decl();
+	}
+	xmlFreeTextReader(reader);
 }
 
+static void writexml(const char *name)
+{
+	mode = WR;
+	writer = xmlNewTextWriterFilename(name, 0);
+	xmlTextWriterStartDocument(writer, NULL, "UTF-8", NULL);
+	startnode("root");
+	all_decl();
+	endnode();
+	xmlFreeTextWriter(writer);
+}
+
+void ui_init()
+{
+	writexml("test.xml");
+	readxml("test.xml");
+}
 

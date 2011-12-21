@@ -16,7 +16,10 @@ objs := algo.o cam.o comm.o net.o ui.o utils.o mcu.o
 
 test-teacher: teacher
 	sudo cp teacher ${fs}/root
-	sudo su ncast -c "cd ~; make open-and-telnet-3530 cmd='cd /root/; ./teacher; cat test.xml; echo testeof' eof=testeof"
+	sudo su ncast -c \
+		"cd ~; make open-and-telnet-3530 \
+		cmd='cd /root/; ./teacher; cat test.xml; \
+		echo; echo testeof' eof='^testeof'"
 
 teacher: $(objs) teacher.o
 

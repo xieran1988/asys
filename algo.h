@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <linux/videodev2.h>
 #include <libxml/xmlwriter.h>
+#include <libxml/xmlreader.h>
 #include <libxml/encoding.h>
 
 /*

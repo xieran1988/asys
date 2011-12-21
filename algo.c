@@ -44,6 +44,7 @@ void cam_callback()
 	frame_no++;
 }
 
+
 void run(int argc, char *argv[])
 {
 	signal(2, doexit);
@@ -55,10 +56,11 @@ void run(int argc, char *argv[])
 
 	log("Copyright 2011. Build: %s. pid %d\n", __DATE__, getpid());
 
-	comm_init();
-	cam_init();
+//	comm_init();
+	//cam_init();
 	ui_init();
-	decl_var_int("T_FRM", &T_FRM, 50, 500);
+
+	return ;
 
 	cam_loop(argc, argv);
 }

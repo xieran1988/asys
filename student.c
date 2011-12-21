@@ -303,7 +303,6 @@ void decl()
 
 int main(int argc, char *argv[]) 
 {
-	decl();
 	run(argc, argv);
 	return 0;
 }
