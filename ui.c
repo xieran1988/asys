@@ -10,7 +10,7 @@ static xmlTextWriterPtr writer;
 #define endnode() xmlTextWriterEndElement(writer);
 #define attr(s, ...) xmlTextWriterWriteFormatAttribute(writer, (xmlChar *)s, __VA_ARGS__)
 #define nodeis(s) !strcmp((char *)xmlTextReaderConstName(reader), s)
-#define nodeattr(s) (char *)xmlTextReaderGetAttribute(reader, s)
+#define nodeattr(s) (char *)xmlTextReaderGetAttribute(reader, (xmlChar *)s)
 #define attris(s, v) !strcmp(nodeattr(s), v)
 #define getattr(s, ...) sscanf(nodeattr(s), __VA_ARGS__)
 
@@ -53,7 +53,6 @@ void decl_var_double(const char *name, double *p, double min, double max)
 	}
 	if (mode == RD && nodeis("double") && attris("name", name)) {
 		getattr("val", "%lf", p);
-		printf("double: %lf\n", *p);
 	}
 }
 

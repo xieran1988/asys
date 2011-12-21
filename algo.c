@@ -14,7 +14,7 @@ static void doexit(int i)
 
 void cam_callback()
 {
-	static double t_frame, t_process, cp, ct, t_last, t_total;
+	static float t_frame, t_process, cp, ct, t_last, t_total;
 
 	t_total = now();
 
@@ -44,6 +44,11 @@ void cam_callback()
 	frame_no++;
 }
 
+float float_test(float k) {
+	float dd = 33*k;
+	dd += 44.2;
+	return dd;
+}
 
 void run(int argc, char *argv[])
 {
@@ -55,12 +60,11 @@ void run(int argc, char *argv[])
 	setbuf(stdout, NULL);
 
 	log("Copyright 2011. Build: %s. pid %d\n", __DATE__, getpid());
+	log("%lf\n", float_test((float)getpid()));
 
-	//comm_init();
+//	comm_init();
 	cam_init();
 	ui_init();
-
-	return ;
 
 	cam_loop(argc, argv);
 }

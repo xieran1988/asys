@@ -1,6 +1,6 @@
 #include <algo.h>
 
-double now()
+float now()
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);

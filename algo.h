@@ -46,7 +46,7 @@ typedef struct {
  */
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
-double now();
+float now();
 #define mon(fmt, args...) {}
 #define log(fmt, args...) { printf("%s: " fmt, __func__, ##args); syslog(LOG_DEBUG, "%s: " fmt, __func__, ##args); }
 #define panic() { log("panic at %s() %s:%d\n", __func__, __FILE__, __LINE__); abort(); }
@@ -70,6 +70,8 @@ void decl_img(const char *name, img_t *img);
 void decl_btn(const char *name, void (*cb)(const char *));
 void decl_var_double(const char *name, double *p, double min, double max);
 void decl_var_int(const char *name, int *p, int min, int max);
+void decl();
+void comm_decl();
 void ui_init();
 
 /*
