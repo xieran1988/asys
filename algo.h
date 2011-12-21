@@ -20,6 +20,8 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/videodev2.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/encoding.h>
 
 /*
  * Basic
@@ -60,7 +62,6 @@ void img_draw_cross(img_t *p, int x, int y, int val);
  */
 void track_send(char *ip,char *buf,int len);
 
-
 /*
  * UI
  */
@@ -68,6 +69,7 @@ void decl_img(const char *name, img_t *img);
 void decl_btn(const char *name, void (*cb)(const char *));
 void decl_var_double(const char *name, double *p, double min, double max);
 void decl_var_int(const char *name, int *p, int min, int max);
+void ui_init();
 
 /*
  * Camera

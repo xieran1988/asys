@@ -1,13 +1,5 @@
 #include <algo.h>
 
-//static char testbuf[20] = {"123456"};
-static struct sockaddr_in clisa;
-static int sockfd;//, sockfd2;
-static char bigbuf[1*1024*1024];//, mac[32];
-char recvbuf[1024];
-static double rxbytes, txbytes;
-FILE *sendfp, *sendfp2, *recvfp;
-
 int sockbind(int port)
 {
 	struct sockaddr_in si;
@@ -28,14 +20,4 @@ int sockbind(int port)
 
 	return fd;
 }
-
-
-void net_init()
-{
-	sockfd = sockbind(ARM_PORT1);
-	sendfp = tmpfile();
-	sendfp2 = tmpfile();
-	recvfp = tmpfile();
-}
-
 

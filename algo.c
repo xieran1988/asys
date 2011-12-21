@@ -14,11 +14,9 @@ static void doexit(int i)
 
 void cam_callback()
 {
-	static double t_frame, t_process, cp, ct, t_last, t_ui, t_total;
+	static double t_frame, t_process, cp, ct, t_last, t_total;
 
 	t_total = now();
-
-	net_send_and_recv();
 
 	if (frame_no == 0) 
 		log("got first frame\n");
@@ -37,11 +35,6 @@ void cam_callback()
 
 	mon("T_frame: %.2lfms\n", t_frame);
 	mon("T_process: %.2lfms\n", t_process);
-
-	t_ui = now();
-	ui_send();
-	t_ui = now() - t_ui;
-	mon("T_ui: %.2lfms\n", t_ui);
 
 	t_total = now() - t_total;
 
@@ -63,7 +56,6 @@ void run(int argc, char *argv[])
 	log("Copyright 2011. Build: %s. pid %d\n", __DATE__, getpid());
 
 	comm_init();
-	net_init();
 	cam_init();
 	ui_init();
 	decl_var_int("T_FRM", &T_FRM, 50, 500);

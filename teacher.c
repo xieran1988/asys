@@ -482,6 +482,10 @@ void decl()
 
 int main(int argc, char *argv[]) 
 {
+	extern void testxml();
+	testxml();
+	return 0;
+
 	maskx1=IMG_W*0.1;
 	masky1=IMG_H*0.4;
 	maskx2=IMG_W*0.9;
