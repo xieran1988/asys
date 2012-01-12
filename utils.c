@@ -1,10 +1,17 @@
 #include <algo.h>
 
+static struct timeval origtv;
+
+void utils_init()
+{
+	gettimeofday(&origtv, NULL);
+}
+
 float now()
 {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
-	return (tv.tv_sec + tv.tv_usec/1e6)*1000;
+	return (tv.tv_sec - origtv.tv_sec + tv.tv_usec/1e6)*1000;
 }
 
 int selected_read(int fd)

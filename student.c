@@ -13,17 +13,17 @@ int MM_H=7;		//统计块高度
 int MB_count=300;	//有效阈值
 int X_line=150;		//忽略前排
 int X_line2=150;	//忽略后排
-double R_zoom=1;
-double R_pan=0;
-double R_tilt=0;
-double zoom_min=1;
-double zoom_max=3;
-double PAN_RANGE=46;
-double TILT_RANGE=25;
-double Timer=-1;
-double TimeOut=1000;
-double MaxTimeOut=15000;
-double MTimer=0;
+float R_zoom=1;
+float R_pan=0;
+float R_tilt=0;
+float zoom_min=1;
+float zoom_max=3;
+float PAN_RANGE=46;
+float TILT_RANGE=25;
+float Timer=-1;
+float TimeOut=1000;
+float MaxTimeOut=15000;
+float MTimer=0;
 int	TimerTODO=0;
 int bRun=1;
 int bPause=0;
@@ -236,10 +236,10 @@ void process()
 	if(ms>MB_count)
 	{
 		img_fill_rect(&MOTION, mx, my, MB_W*MM_W, MB_H*MM_H, 255);
-		double tp = (double)(mx - IMG_W/2) / (IMG_W/2) * (PAN_RANGE/2);
-		double tt = (double)(IMG_H/2-my-MB_H*MM_H/2) / (IMG_H/2) * (TILT_RANGE/2);
+		float tp = (float)(mx - IMG_W/2) / (IMG_W/2) * (PAN_RANGE/2);
+		float tt = (float)(IMG_H/2-my-MB_H*MM_H/2) / (IMG_H/2) * (TILT_RANGE/2);
 		set_target_pan_tilt(tp, tt);
-		double zz=zoom_min+((double)(IMG_H-X_line2-my)/(IMG_H-X_line2-X_line))*(zoom_max-zoom_min);
+		float zz=zoom_min+((float)(IMG_H-X_line2-my)/(IMG_H-X_line2-X_line))*(zoom_max-zoom_min);
 		if(zz<1)
 			zz=1;
 		set_zoom(zz);
@@ -278,15 +278,15 @@ void decl()
 	decl_var_int("MB_count", &MB_count, 0, 500);
 	decl_var_int("X_line", &X_line, 0, 240);
 	decl_var_int("X_line2", &X_line2, 0, 240);
-	decl_var_double("PAN_RANGE", &PAN_RANGE, 0, 120);
-	decl_var_double("TILT_RANGE", &TILT_RANGE, 0, 120);
-	decl_var_double("R_zoom", &R_zoom, 1, 10);
-	decl_var_double("R_pan", &R_pan, -90, 90);
-	decl_var_double("R_tilt", &R_tilt, -90, 90);
-	decl_var_double("zoom_min", &zoom_min, 1, 10);
-	decl_var_double("zoom_max", &zoom_max, 1, 10);
-	decl_var_double("PD_Delay", &TimeOut, 0, 10000);
-	decl_var_double("PD_Timeout", &MaxTimeOut, 0, 100000);
+	decl_var_float("PAN_RANGE", &PAN_RANGE, 0, 120);
+	decl_var_float("TILT_RANGE", &TILT_RANGE, 0, 120);
+	decl_var_float("R_zoom", &R_zoom, 1, 10);
+	decl_var_float("R_pan", &R_pan, -90, 90);
+	decl_var_float("R_tilt", &R_tilt, -90, 90);
+	decl_var_float("zoom_min", &zoom_min, 1, 10);
+	decl_var_float("zoom_max", &zoom_max, 1, 10);
+	decl_var_float("PD_Delay", &TimeOut, 0, 10000);
+	decl_var_float("PD_Timeout", &MaxTimeOut, 0, 100000);
 
 
 	decl_var_int("MB_W", &MB_W, 2, 50);

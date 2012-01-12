@@ -23,6 +23,7 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 #include <libxml/encoding.h>
+#include <jpeglib.h>
 
 /*
  * Basic
@@ -40,6 +41,8 @@ typedef unsigned int u32;
 typedef struct {
 	u8 data[IMG_H][IMG_W];
 } img_t; 
+#define BMPPATH "/tmp/a.bmp"
+#define JPGPATH "/tmp/a.jpg"
 
 /*
  * Utils
@@ -48,7 +51,10 @@ typedef struct {
 #define max(a,b) ((a)>(b)?(a):(b))
 float now();
 #define mon(fmt, args...) {}
-#define log(fmt, args...) { printf("%s: " fmt, __func__, ##args); syslog(LOG_DEBUG, "%s: " fmt, __func__, ##args); }
+#define log(fmt, args...) { \
+	printf("%.2f: %s: " fmt, now(), __func__, ##args); \
+	syslog(LOG_DEBUG, "%s: " fmt, __func__, ##args); \
+}
 #define panic() { log("panic at %s() %s:%d\n", __func__, __FILE__, __LINE__); abort(); }
 int selected_read(int fd);
 static inline void img_copy(img_t *a, img_t *b) { memcpy(a->data, b->data, sizeof(a->data)); }
@@ -57,6 +63,7 @@ static inline void img_fill(img_t *dst, u8 val) { memset(dst->data, val, sizeof(
 void img_fill_rect(img_t *p, int x, int y, int w, int h, int val);
 void img_plot_rect(img_t *p, int x, int y, int w, int h, int val);
 void img_draw_cross(img_t *p, int x, int y, int val);
+void utils_init();
 
 /*
  * Mcu
@@ -68,7 +75,7 @@ void track_send(char *ip,char *buf,int len);
  */
 void decl_img(const char *name, img_t *img);
 void decl_btn(const char *name, void (*cb)(const char *));
-void decl_var_double(const char *name, double *p, double min, double max);
+void decl_var_float(const char *name, float *p, float min, float max);
 void decl_var_int(const char *name, int *p, int min, int max);
 void decl();
 void comm_decl();
@@ -87,15 +94,15 @@ void cam_exit();
 /*
  * Comm
  */
-void set_target_pan_tilt(double p, double t);
-void get_cur_pan_tilt(double *p, double *t);
-void set_zoom(double z);
+void set_target_pan_tilt(float p, float t);
+void get_cur_pan_tilt(float *p, float *t);
+void set_zoom(float z);
 void set_indoor();
-//void PTZABS(double p, double t, double z);
+//void PTZABS(float p, float t, float z);
 void mcu_send(char *ip,char *buf,int len);
 extern int bMoving;
-extern double cur_pan, cur_tilt;
-extern double offset_pan;
+extern float cur_pan, cur_tilt;
+extern float offset_pan;
 
 
 //#define PAN_RANGE 53

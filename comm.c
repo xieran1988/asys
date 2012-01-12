@@ -1,14 +1,14 @@
 #include <algo.h>
 int bMoving;
-double cur_pan, cur_tilt;
-static double pan;
-static double tilt;
-static double zoom;
-static double targetPan;
-static double targetTilt;
-static double targetZoom;
-static double PTTemp,ZTemp;    //用于控制变速，暂时采用简单的线性变化(每增加一度，速度加1)
-static double PTAccuracy, ZAccuracy;
+float cur_pan, cur_tilt;
+static float pan;
+static float tilt;
+static float zoom;
+static float targetPan;
+static float targetTilt;
+static float targetZoom;
+static float PTTemp,ZTemp;    //用于控制变速，暂时采用简单的线性变化(每增加一度，速度加1)
+static float PTAccuracy, ZAccuracy;
 static int ID;
 static int protocol;
 static char rbuf[100];
@@ -21,8 +21,8 @@ static void MyWrite(char *bt,int len);
 static void PTZMove(int h, int v);
 static void PTZZoom(int speed);
 
-double offset_pan = 0;
-double offset_tilt = 0;
+float offset_pan = 0;
+float offset_tilt = 0;
 int	call_delay=30;
 int	call_timeout=20;
 
@@ -36,12 +36,12 @@ void set_indoor()
 void comm_decl()
 {
 	
-	decl_var_double("offset_pan", &offset_pan, -50, 50);
-	decl_var_double("offset_tilt", &offset_tilt, -50, 50);
-	decl_var_double("pan_tilt_speed", &PTTemp, 0, 4);
-	decl_var_double("zoom_speed", &ZTemp, 0, 5);
-	decl_var_double("pan_tilt_accuracy", &PTAccuracy, 0.1, 5);
-	decl_var_double("zoom_accuracy", &ZAccuracy, 0.1, 5);
+	decl_var_float("offset_pan", &offset_pan, -50, 50);
+	decl_var_float("offset_tilt", &offset_tilt, -50, 50);
+	decl_var_float("pan_tilt_speed", &PTTemp, 0, 4);
+	decl_var_float("zoom_speed", &ZTemp, 0, 5);
+	decl_var_float("pan_tilt_accuracy", &PTAccuracy, 0.1, 5);
+	decl_var_float("zoom_accuracy", &ZAccuracy, 0.1, 5);
 	decl_var_int("call_delay", &call_delay, 10, 500);
 	decl_var_int("call_timeout", &call_timeout, 10, 500);
 
@@ -88,7 +88,7 @@ static void CallPanTilt()
 	MyWrite(getPT,5);
 }
 /*
-void PTZABS(double p, double t, double z)
+void PTZABS(float p, float t, float z)
 {
 
 	unsigned long dp,dt;
@@ -121,13 +121,13 @@ void PTZABS(double p, double t, double z)
 
 	char setZoom[]={0x81,0x01,0x04,0x47,0x01,0x01,0x01,0x01,0xFF,0xFF};
 
-	double	a=-42799.32,
+	float	a=-42799.32,
 			b=0.49368463,
 			c=21118.889,
 			d=0.63396036;
 
-	double xd=pow(z,d);
-	double px=(a*b+c*xd)/(b+xd);
+	float xd=pow(z,d);
+	float px=(a*b+c*xd)/(b+xd);
 	if(px<0)
 		px=0;
 	long dz=px;
@@ -145,19 +145,19 @@ void PTZABS(double p, double t, double z)
 
 }*/
 
-void get_cur_pan_tilt(double *p, double *t)
+void get_cur_pan_tilt(float *p, float *t)
 {
 	*p = cur_pan;
 	*t = cur_tilt;
 }
 
-void set_target_pan_tilt(double p,double t)
+void set_target_pan_tilt(float p,float t)
 {
 	targetPan=p+offset_pan;
 	targetTilt=t+offset_tilt;
 }
 
-void set_zoom(double z)
+void set_zoom(float z)
 {
 	targetZoom=z;
 }
@@ -195,8 +195,8 @@ static void readPanTilt(int *bt)
 	tt+=bt[9];
 
 	//后面加入多协议支持
-	double p=180.0*(double)(pp)/2400;
-	double t=180.0*(double)(tt)/2400;
+	float p=180.0*(float)(pp)/2400;
+	float t=180.0*(float)(tt)/2400;
 /*
 	int k;
 	for(k=0;k<11;k++)
@@ -207,7 +207,7 @@ static void readPanTilt(int *bt)
 */
 	if(1)//结果合理判断
 	{
-		double dp, dt;
+		float dp, dt;
 		pan=p;
 		tilt=t;
 	
@@ -237,7 +237,7 @@ static void readPanTilt(int *bt)
 
 	cur_pan = p;
 	cur_tilt = t;
-	//printf("-------------------------------------- cur_pan %lf cur_tilt %lf time %lf \n", p, t, now());
+	//printf("-------------------------------------- cur_pan %f cur_tilt %f time %f \n", p, t, now());
 }
 
 static void readZoom(int *bt)
@@ -254,27 +254,27 @@ static void readZoom(int *bt)
 	//后面加入多协议支持
 
 // for X18
-	double  a=-42799.32,
+	float  a=-42799.32,
 			b=0.49368463,
 			c=21118.889,
 			d=0.63396036;
 
 /*
 // for X10
-	double  a=-28249.3980628,
+	float  a=-28249.3980628,
 			b=0.771340788777,
 			c=22270.2880859,
 			d=0.747895056549;
 */
-	double tm=(b*zm-a*b)/(c-zm);
-	double z=pow(tm,1/d);
+	float tm=(b*zm-a*b)/(c-zm);
+	float z=pow(tm,1/d);
 	if(z>18)
 		z=18;
-	//printf("cur_zoom %lf\n", z);
+	//printf("cur_zoom %f\n", z);
 	if(z>0.99 && z<18.1)
 	{
 		zoom=z;
-		double dz = -(targetZoom - zoom);
+		float dz = -(targetZoom - zoom);
 		if (fabs(dz) < ZAccuracy)
 			dz = 0;
 		else {

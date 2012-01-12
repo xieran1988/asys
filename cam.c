@@ -159,14 +159,20 @@ retry:
 	log("Init done successfully\n");
 }
 
-static void process_img(u8 *p)
+static void wait_(float t)
+{
+	static float t_sleep, t_last;
+
+	t_sleep = now() - t_last;
+	if (t_sleep < t)
+		usleep((t - t_sleep) * 1000);
+	t_last = now();
+}
+
+static void process_img(void *data, void *_)
 {
 	int x, y;
-	double t;
-	u8 *b;
-	static double t_sleep, t_last;
-
-	t = now();
+	u8 *b, *p = (u8 *)data;
 
 	if (shouldshrink) {
 		for (y = 0; y < IMG_H*2; y += 2) {
@@ -183,21 +189,12 @@ static void process_img(u8 *p)
 			}
 		}
 	}
-
-	mon("cam_process_img: %lfms\n", now() - t);
-
-	t_sleep = now() - t_last;
-	if (t_sleep < T_FRM)
-		usleep((T_FRM - t_sleep) * 1000);
-	t_last = now();
-
 	cam_callback();
 }
 
-void cam_loop(int argc, char *argv[])
+static void cam_streamon()
 {
 	int a;
-	struct v4l2_buffer capture_buf;
 
 	a = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	if (ioctl(capfd, VIDIOC_STREAMON, &a)) {
@@ -205,23 +202,40 @@ void cam_loop(int argc, char *argv[])
 		panic();
 	}
 	log("Stream on...\n");
+}
 
+void cam_poll_wait(void (*func)(void *, void *), void *p, float t)
+{
+	struct v4l2_buffer capture_buf;
+	
 	capture_buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	capture_buf.index = 0;
 	capture_buf.memory = V4L2_MEMORY_MMAP;
 
-	while (1) {
-		if (ioctl(capfd, VIDIOC_DQBUF, &capture_buf)) {
-			log("error VIDIOC_DQBUF\n");
-			panic();
-		}
-		process_img((u8 *)capbuf[capture_buf.index].start);
-		if (ioctl(capfd, VIDIOC_QBUF, &capture_buf)) {
-			log("error VIDIOC_QBUF\n");
-			panic();
-		}
+	if (ioctl(capfd, VIDIOC_DQBUF, &capture_buf)) {
+		log("error VIDIOC_DQBUF\n");
+		panic();
+	}
+	func(capbuf[capture_buf.index].start, p);
+	wait_(t);
+	if (ioctl(capfd, VIDIOC_QBUF, &capture_buf)) {
+		log("error VIDIOC_QBUF\n");
+		panic();
 	}
 }
 
+#ifndef MYSRC
+void cam_loop(int argc, char *argv[])
+{
+	cam_streamon();
+	while (1) 
+		cam_poll_wait(process_img, NULL, T_FRM);
+}
+#endif
 
+void cam_start()
+{
+	cam_init();
+	cam_streamon();
+}
 

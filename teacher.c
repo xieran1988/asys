@@ -1,42 +1,42 @@
 #include <algo.h>
 
-static double PAN_RANGE=75;
-double CAM_RANGE=48;
+static float PAN_RANGE=75;
+float CAM_RANGE=48;
 int compare_th = 14;
 int compare_th2 = 22;
 int UB_W = 80;
 int UB_H = 50;
 int	UB_T = 15000;
-double UB_th = 0.01;
+float UB_th = 0.01;
 int CB_W = 15;
 int CB_H = 20;
-double CB_th = 0.1;
+float CB_th = 0.1;
 int LB_th = 1500;
 int dark = 22;
-double dark_th = 1.3;
-double B_Alpha = 0.15;
-double zoom_normal = 2.0;
-double zoom_close = 2.5;
-double R_time = 2000;
-double R_zoom = 1;
-double R_pan = 0;
-double R_tilt = -10;
-double zoom_limt=5000;
-double S_time=3000;
-double M_angle=8;
-double SA_p=4;
-double SA_z=0.2;
+float dark_th = 1.3;
+float B_Alpha = 0.15;
+float zoom_normal = 2.0;
+float zoom_close = 2.5;
+float R_time = 2000;
+float R_zoom = 1;
+float R_pan = 0;
+float R_tilt = -10;
+float zoom_limt=5000;
+float S_time=3000;
+float M_angle=8;
+float SA_p=4;
+float SA_z=0.2;
 
 int maskx1, maskx2, masky1, masky2;
 
 /*
-static double PAN_RANGE=75;
-//static double TILT_RANGE=25;
-static double R_timeout = 20*1000;
-static double R_zoom = 1;
-static double R_pan = 0;
-static double R_tilt = 0;
-static double last_lost_tm = -1;
+static float PAN_RANGE=75;
+//static float TILT_RANGE=25;
+static float R_timeout = 20*1000;
+static float R_zoom = 1;
+static float R_pan = 0;
+static float R_tilt = 0;
+static float last_lost_tm = -1;
 */
 static int bInited = 0;
 img_t BACK,	//背景 
@@ -224,18 +224,18 @@ void cluster()
 		}
 }
 
-void myTimer(double *p,double *t,double *z,int c)
+void myTimer(float *p,float *t,float *z,int c)
 {
-	static double last_tm = 0;
-	double add=now()-last_tm;
+	static float last_tm = 0;
+	float add=now()-last_tm;
 	last_tm = now();
-	static double stop_tm = 0; //bMoving==0的时间
-	static double zoom_tm = 0; //上一次改变zoom的时间
-	static double lost_tm = 0; //丢失目标时间
-	static double zoom_state=0;
-	static double last_p=0;
-	static double last_t=0;
-	static double last_z=0;
+	static float stop_tm = 0; //bMoving==0的时间
+	static float zoom_tm = 0; //上一次改变zoom的时间
+	static float lost_tm = 0; //丢失目标时间
+	static float zoom_state=0;
+	static float last_p=0;
+	static float last_t=0;
+	static float last_z=0;
 	if(zoom_state<0.99)
 	{
 		zoom_state=zoom_normal;
@@ -399,7 +399,7 @@ void process()
 		
 	}
 
-	double p=0,t=0,z=1;
+	float p=0,t=0,z=1;
 	int ml=IMG_W,mr=0,cx=0,dx;
 	for(i=0;i<k;i++)
 	{
@@ -409,10 +409,10 @@ void process()
 	cx=(ml+mr)/2;
 	dx=(mr-ml)*1.3;
 	
-	p = (double)(cx - IMG_W/2) / (IMG_W/2) * (PAN_RANGE/2);
+	p = (float)(cx - IMG_W/2) / (IMG_W/2) * (PAN_RANGE/2);
 	
 
-	z = CAM_RANGE / ((double)dx / IMG_W * PAN_RANGE);
+	z = CAM_RANGE / ((float)dx / IMG_W * PAN_RANGE);
 
 	if(z<1.0)
 		z=1;
@@ -442,32 +442,32 @@ void decl()
 	decl_var_int("Y1", &masky1, 0, IMG_H);
 	decl_var_int("X2", &maskx2, 0, IMG_W);
 	decl_var_int("Y2", &masky2, 0, IMG_H);
-	decl_var_double("PAN_RANGE", &PAN_RANGE, 0, 120);
-	decl_var_double("CAM_RANGE", &CAM_RANGE, 30, 120);
+	decl_var_float("PAN_RANGE", &PAN_RANGE, 0, 120);
+	decl_var_float("CAM_RANGE", &CAM_RANGE, 30, 120);
 	decl_var_int("LB_th", &LB_th, 200, 10000);
-	decl_var_double("zoom_normal", &zoom_normal , 1, 18);
-	decl_var_double("zoom_close", &zoom_close , 1, 18);
-	decl_var_double("zoom_limt", &zoom_limt , 0, 50000);
-	decl_var_double("S_time", &S_time , 0, 50000);
-	decl_var_double("M_angle", &M_angle , 0, 30);
-	decl_var_double("SA_p", &SA_p , 0, 30);
-	decl_var_double("R_zoom", &R_zoom, 1, 10);
-	decl_var_double("R_pan", &R_pan, -90, 90);
-	decl_var_double("R_tilt", &R_tilt, -90, 90);
-	decl_var_double("R_time", &R_time, 100, 100*1000);
+	decl_var_float("zoom_normal", &zoom_normal , 1, 18);
+	decl_var_float("zoom_close", &zoom_close , 1, 18);
+	decl_var_float("zoom_limt", &zoom_limt , 0, 50000);
+	decl_var_float("S_time", &S_time , 0, 50000);
+	decl_var_float("M_angle", &M_angle , 0, 30);
+	decl_var_float("SA_p", &SA_p , 0, 30);
+	decl_var_float("R_zoom", &R_zoom, 1, 10);
+	decl_var_float("R_pan", &R_pan, -90, 90);
+	decl_var_float("R_tilt", &R_tilt, -90, 90);
+	decl_var_float("R_time", &R_time, 100, 100*1000);
 	decl_var_int("compare_th", &compare_th, 0, 50);
 	decl_var_int("compare_th2", &compare_th2, 0, 50);
 	decl_var_int("UB_W", &UB_W, 0, 200);
 	decl_var_int("UB_H", &UB_H, 0, 200);
 	decl_var_int("UB_T", &UB_T, 0, 50000);	
-	decl_var_double("UB_th", &UB_th, 0, 0.2);
+	decl_var_float("UB_th", &UB_th, 0, 0.2);
 	decl_var_int("CB_W", &CB_W, 0, 200);
 	decl_var_int("CB_H", &CB_H, 0, 200);
-	decl_var_double("CB_th", &CB_th, 0, 1);	
+	decl_var_float("CB_th", &CB_th, 0, 1);	
 	decl_var_int("dark", &dark, 0, 50);
-	decl_var_double("dark_th", &dark_th, 0, 5);
-	decl_var_double("B_Alpha", &B_Alpha, 0, 1);
-	decl_var_double("SA_z", &SA_z, 0, 1);
+	decl_var_float("dark_th", &dark_th, 0, 5);
+	decl_var_float("B_Alpha", &B_Alpha, 0, 1);
+	decl_var_float("SA_z", &SA_z, 0, 1);
 
 /*	
 	//decl_imgsel("maskarea", &mask);
@@ -476,7 +476,7 @@ void decl()
 	
 		
 	
-//	decl_var_double("TILT_RANGE", &TILT_RANGE, 0, 120);
+//	decl_var_float("TILT_RANGE", &TILT_RANGE, 0, 120);
 */
 }
 

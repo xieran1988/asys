@@ -24,22 +24,24 @@ void cam_callback()
 	t_frame = now() - t_last;
 	t_last = now();
 
-	mon("no: %d fps: %.2lf\n", frame_no, 1000 / t_frame);
+	mon("no: %d fps: %.2f\n", frame_no, 1000 / t_frame);
 
 	t_process = now();
 	process();
 	t_process = now() - t_process;
 
 	get_cur_pan_tilt(&cp, &ct);
-	mon("cur_pan %.2lf cur_tilt %.2lf\n", cp, ct);
+	mon("cur_pan %.2f cur_tilt %.2f\n", cp, ct);
 
-	mon("T_frame: %.2lfms\n", t_frame);
-	mon("T_process: %.2lfms\n", t_process);
+	mon("T_frame: %.2fms\n", t_frame);
+	mon("T_process: %.2fms\n", t_process);
+
+	ui_int();
 
 	t_total = now() - t_total;
 
-	printf("%d real %.2lfms set %.2lfms used %.2lfms\n", 
-			frame_no, t_frame, T_FRM*1., t_total);
+	printf("%d set %.2fms used %.2fms\n", 
+			frame_no, T_FRM*1., t_total);
 
 	frame_no++;
 }
@@ -59,12 +61,18 @@ void run(int argc, char *argv[])
 	signal(13, doexit);
 	setbuf(stdout, NULL);
 
-	log("Copyright 2011. Build: %s. pid %d\n", __DATE__, getpid());
-	log("%lf\n", float_test((float)getpid()));
-
+	utils_init();
+//	log("%f\n", float_test((float)getpid()));
+//	log("%f\n", now());
+//	log("%f\n", now());
 //	comm_init();
 	cam_init();
+	log("%f\n", now());
 	ui_init();
+	log("%f\n", now());
+#ifdef UITEST
+	return ;
+#endif
 
 	cam_loop(argc, argv);
 }
