@@ -161,11 +161,16 @@ retry:
 
 static void wait_(float t)
 {
-	static float t_sleep, t_last;
+	static float t_last;
 
-	t_sleep = now() - t_last;
-	if (t_sleep < t)
-		usleep((t - t_sleep) * 1000);
+	t = 1000./16;
+	t -= now() - t_last;
+
+	printf("%s %.2f\n", t>0?"":"!!!!", t);
+	if (t > 0) {
+		if (usleep(t * 1000))
+			printf("usleep failed\n");
+	}
 	t_last = now();
 }
 
@@ -235,6 +240,7 @@ void cam_loop(int argc, char *argv[])
 
 void cam_start()
 {
+	utils_init();
 	cam_init();
 	cam_streamon();
 }
