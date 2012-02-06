@@ -52,7 +52,7 @@ typedef struct {
 float now();
 #define mon(fmt, args...) {}
 #define log(fmt, args...) { \
-	printf("%.2f: %s: " fmt, now(), __func__, ##args); \
+	fprintf(stderr, "%.2f: %s: " fmt, now(), __func__, ##args); \
 	syslog(LOG_DEBUG, "%s: " fmt, __func__, ##args); \
 }
 #define panic() { log("panic at %s() %s:%d\n", __func__, __FILE__, __LINE__); abort(); }

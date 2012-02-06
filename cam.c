@@ -166,7 +166,7 @@ static void wait_(float t)
 	t = 1000./16;
 	t -= now() - t_last;
 
-	printf("%s %.2f\n", t>0?"":"!!!!", t);
+	printf("delay %s %.2f\n", t>0?"":"!!!!", t);
 	if (t > 0) {
 		if (usleep(t * 1000))
 			printf("usleep failed\n");
@@ -229,14 +229,12 @@ void cam_poll_wait(void (*func)(void *, void *), void *p, float t)
 	}
 }
 
-#ifndef MYSRC
 void cam_loop(int argc, char *argv[])
 {
 	cam_streamon();
 	while (1) 
 		cam_poll_wait(process_img, NULL, T_FRM);
 }
-#endif
 
 void cam_start()
 {
@@ -244,4 +242,32 @@ void cam_start()
 	cam_init();
 	cam_streamon();
 }
+
+#ifdef MYCAM
+static int sockfd;
+void cam_callback() {}
+static void output_img(void *data, void *_)
+{
+	struct sockaddr_in serv_addr;
+	serv_addr.sin_family=AF_INET;
+	serv_addr.sin_port=htons(1190);
+	serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");;
+	bzero(&(serv_addr.sin_zero),8);
+	sendto(sockfd, data, IMG_W*IMG_H*2, 0, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+}
+int main(int argc, char *argv[])
+{
+	float f;
+	if (argc != 2) {
+		printf("usage: mycam [fps]\n");
+		exit(1);
+	}
+	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	sscanf(argv[1], "%f", &f);
+	cam_start();
+	while (1) 
+		cam_poll_wait(output_img, NULL, 1000./f);
+	return 0;
+}
+#endif
 
